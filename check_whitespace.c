@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 /*
  * Strips spaces from both the front and back of a string,
  * leaving any internal spaces alone.
+ *
+ * The returned string needs to be freed.
  */
 char* strip(char* str) {
   int size;
@@ -33,7 +36,8 @@ char* strip(char* str) {
   // consisted of nothing but spaces, so we'll return the
   // empty string.
   if (num_spaces >= size) {
-    return "";
+    // A new string with just a null terminator.
+    return calloc(1, sizeof(char));
   }
 
   // Allocate a slot for all the "saved" characters
@@ -43,8 +47,8 @@ char* strip(char* str) {
   for (i=first_non_space; i<=last_non_space; ++i) {
     result[i-first_non_space] = str[i];
   }
-  // Place the null terminator at the end of the result string.
-  result[i-first_non_space] = '\0';
+  // `calloc` initializes all bytes to zero, so we don't need to add a null
+  // terminator by hand.
 
   return result;
 }
@@ -53,9 +57,9 @@ char* strip(char* str) {
  * Return true (1) if the given string is "clean", i.e., has
  * no spaces at the front or the back of the string.
  */
-int is_clean(char* str) {
+bool is_clean(char* str) {
   char* cleaned;
-  int result;
+  bool is_str_clean;
 
   // We check if it's clean by calling strip and seeing if the
   // result is the same as the original string.
@@ -65,9 +69,11 @@ int is_clean(char* str) {
   // the first is less than the second (in alphabetical order),
   // 0 if they're equal, and a positive value if the first is
   // greater than the second.
-  result = strcmp(str, cleaned);
+  is_str_clean = (strcmp(str, cleaned) == 0);
 
-  return result == 0;
+  free(cleaned);
+
+  return is_str_clean;
 }
 
 int main() {
